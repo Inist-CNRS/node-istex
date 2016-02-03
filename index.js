@@ -25,13 +25,17 @@ var request = require('request').defaults({
 		if (err) {
 			return err;
 		}
+		var test = '';
 		var metaistex = {};
 		var result = JSON.parse(body);	
 		
 		metaistex.publisher_name = result.corpusName;
 		metaistex.print_identifier = result.host.issn;
 		metaistex.doi = result.doi;
-		console.log(metaistex);
+		metaistex.publication_title = result.host.title;
+		metaistex.publication_date = result.publicationDate;
+		test = result.host.pii;
+		console.log(test);
 	});
 //};
 
