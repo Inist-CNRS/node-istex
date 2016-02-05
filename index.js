@@ -30,12 +30,22 @@ var request = require('request').defaults({
 		var result = JSON.parse(body);	
 		
 		metaistex.publisher_name = result.corpusName;
-		metaistex.print_identifier = result.host.issn;
-		metaistex.doi = result.doi;
+
+		
+		if (result.host.isbn) metaistex.print_identifier = result.host.isbn[0];
+		if (result.host.issn) metaistex.print_identifier = result.host.issn[0];
+		if (result.host.eisbn) metaistex.online_identifier = result.host.eisbn[0];
+		if (result.doi) metaistex.doi = result.doi[0];
 		metaistex.publication_title = result.host.title;
+		if (result.publicationDate) { 
 		metaistex.publication_date = result.publicationDate;
-		test = result.host.pii;
-		console.log(test);
+		} else { 
+		metaistex.publication_date = result.copyrightDate;	
+		}
+		//metaistex.ppn
+		metaistex.rtype = result.genre[0].toUpperCase();
+		metaistex.language = result.language[0]; 
+		console.log(metaistex);
 	});
 //};
 
