@@ -12,8 +12,13 @@ var request = require('request').defaults({
 * @param {Object} options
 * @param {Function} callback(err, result)
 */
-//exports.find = function (search, options, callback) {
+exports.find = function (search,  callback) {
+
 	var search = '55420CDEEA0F6538E215A511C72E2E5E57570138';
+	console.log(search.length)
+	if (!search && search.length != 40)  {
+		return callback(new Error("index istex is incorrect"));
+	}
 	var urlistex = 'https://api.istex.fr/document/' + search ;
 	var options = {
 	  url: urlistex,
@@ -21,14 +26,22 @@ var request = require('request').defaults({
 	    'User-Agent': 'ezpaarse'
 	  }
 	};
+	var data = require('./rtype.json');
 	request.get(options, function (err , req , body){
-		if (err) {
-			return err;
-		}
-		var test = '';
-		var metaistex = {};
-		var result = JSON.parse(body);	
+		if (err) { return callback(err); }
 		
+			
+		try {
+			var result = JSON.parse(body);
+		} catch (e) {
+			return callback(e);
+		}
+
+		if (result.error) {
+			return callback(new Error(result.error));
+		}
+		 callback(null, result);
+		/*	
 		metaistex.publisher_name = result.corpusName;
 
 		
@@ -43,9 +56,10 @@ var request = require('request').defaults({
 		metaistex.publication_date = result.copyrightDate;	
 		}
 		//metaistex.ppn
-		metaistex.rtype = result.genre[0].toUpperCase();
+		metaistex.rtype = data[result.genre[0]];
 		metaistex.language = result.language[0]; 
-		console.log(metaistex);
+		*/
+		
 	});
-//};
+};
 
