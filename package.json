@@ -1,6 +1,6 @@
 {
-  "name": "meta-istex",
-  "version": "1.0.0",
+  "name": "node-istex",
+  "version": "1.0.1",
   "description": "",
   "main": "index.js",
   "scripts": {
