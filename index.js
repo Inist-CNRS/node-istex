@@ -77,7 +77,7 @@ exports.findlot = function (search, callback) {
 		if (result.total == 0 && result.error) {
 			return callback(new Error('erreur de requette'));
 		}
-		callback(null, result.hits[0]);
+		callback(null, result.hits);
 	
 	});
 };
