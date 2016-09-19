@@ -2,6 +2,30 @@
 
 var request = require('request');
 
+
+/**
+ * Mise en place des options réglables par la méthode defaults
+ * (comme pour le module request)
+ * - userAgent : le user agent positionnée dans les requêtes HTTP qui seront réalisées sur l'API istex
+ * - sid: le paramètre sid qui sera ajouter dans la querystring des requetes vers l'API istex
+ *        et qui permet de signaler à ISTEX quel outil a réalisé la requête à des fin de statistique
+ *        (ex: google-scholar, istex-brower-addon, istex-widgets, ebsco ...)
+ */
+var options = {
+  userAgent:         'node-istex',
+  extraQueryString:  '&sid=node-istex'
+};
+exports.defaults = function (opt) {
+  if (opt.userAgent) {
+    options.userAgent        = opt.userAgent;
+    options.extraQueryString = '&sid=' + opt.userAgent;
+  }
+  if (opt.extraQueryString) {
+    options.extraQueryString = opt.extraQueryString;
+  }
+  return exports;
+}
+
 /**
  * Recherche une liste de documents ISTEX
  * Exemple pour la variable search : ?q=brain
@@ -56,14 +80,14 @@ exports.findByIstexIds = function (istexIds, callback) {
   url += istexIds.join(' OR ');
   url += ')';
 
-  var options = {
-    url: url,
+  var requestOpt = {
+    url: url + options.extraQueryString,
     headers: {
-      'User-Agent': 'ezpaarse'
+      'User-Agent': options.userAgent
     }
   };
 
-  request.get(options, function (err, req, body) {
+  request.get(requestOpt, function (err, req, body) {
     if (err) { return callback(err); }
 
     try {
@@ -76,7 +100,6 @@ exports.findByIstexIds = function (istexIds, callback) {
       return callback(new Error('erreur de requette'));
     }
     callback(null, result.hits);
-
   });
 };
 /**

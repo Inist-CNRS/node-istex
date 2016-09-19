@@ -66,3 +66,21 @@ istex.findByIstexIds([ '128CB89965DA8E531EC59C61102B0678DDEE6BB7', 'F1F927C3A43B
 ```
 
 Remarque: la méthode ``findlot`` est obsolète, elle est remplacée par ``findByIstexIds``
+
+
+
+## Paramètres
+
+Il est possible de régler les paramètres suivants de la manière suivante :
+
+```javascript
+var istex = require("node-istex").defaults({
+  // le user agent qui sera utilisé pour faire 
+  // les requêtes HTTP vers l'API istex
+  userAgent: 'my-application',
+
+  // les paramètres suplémentaire à ajouter dans toutes les l'URL
+  // pour faire des requêtes vers l'API istex
+  extraQueryString: '&sid=my-application'
+});
+```
