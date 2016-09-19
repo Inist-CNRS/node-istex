@@ -4,7 +4,7 @@ var request = require('request');
 
 /**
  * Recherche une liste de documents ISTEX
- * Exemple pour la variable search
+ * Exemple pour la variable search : ?q=brain
  */
 exports.find = function (search,  callback) {
 
@@ -36,26 +36,33 @@ exports.find = function (search,  callback) {
   });
 };
 
-exports.findlot = function (search, callback) {
-
-  var urlistex = 'https://api.istex.fr/document/?size=200&output=*&q=id:(';
-  if (search && search.length != 0)  {
-    urlistex += search.shift();
-  } else {
-    return callback(new Error('index istex is incorrect'));
+/**
+ * Recherche une liste de documents ISTEX
+ * en partant d'une liste d'identifiants ISTEX
+ * Exemple pour la variable search :
+ * [ '128CB89965DA8E531EC59C61102B0678DDEE6BB7', 'F1F927C3A43BC42B161D4BBEC3DD7719001E0429' ]
+ */
+exports.findByIstexIds = function (istexIds, callback) {
+  if (istexIds.length > 200) {
+    var err = new Error('node-istex findByIstexIds cannot be called with more than 200 istex ids (' + istexIds.length + ' requested)');
+    return callback(err);
   }
-  for (var i = 0; i < search.length; i++) {
-    urlistex = urlistex + ' OR ' + search[i] ;
+  if (istexIds.length <= 0) {
+    var err = new Error('node-istex findByIstexIds should be called with 1 or more istex ids (' + istexIds.length + ' requested)');
+    return callback(err);
   }
 
-  urlistex = urlistex + ')';
+  var url = 'https://api.istex.fr/document/?size=200&output=*&q=id:(';
+  url += istexIds.join(' OR ');
+  url += ')';
 
   var options = {
-    url: urlistex,
+    url: url,
     headers: {
       'User-Agent': 'ezpaarse'
     }
   };
+
   request.get(options, function (err, req, body) {
     if (err) { return callback(err); }
 
@@ -71,5 +78,16 @@ exports.findlot = function (search, callback) {
     callback(null, result.hits);
 
   });
+};
+/**
+ * Deprecated: bad naming
+ */
+var findlotWarningDisplayed = false;
+exports.findlot = function (search, callback, noWarning) {
+  if (!findlotWarningDisplayed && !noWarning) {
+    console.error('node-istex: findlot is deprecated, use findByIstexIds instead');
+    findlotWarningDisplayed = true;
+  }
+  return exports.findByIstexIds(search, callback);
 };
 
