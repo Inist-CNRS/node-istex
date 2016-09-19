@@ -1,16 +1,35 @@
 'use strict';
 
-var request = require('request').defaults({proxy: process.env.http_proxy ||
-process.env.HTTP_PROXY ||
-process.env.https_proxy ||
-process.env.HTTPS_PROXY
-});
+var request = require('request');
+
 
 /**
-* @param {Object} search
-* @param {Object} options
-* @param {Function} callback(err, result)
-*/
+ * Mise en place des options réglables par la méthode defaults
+ * (comme pour le module request)
+ * - userAgent : le user agent positionnée dans les requêtes HTTP qui seront réalisées sur l'API istex
+ * - sid: le paramètre sid qui sera ajouter dans la querystring des requetes vers l'API istex
+ *        et qui permet de signaler à ISTEX quel outil a réalisé la requête à des fin de statistique
+ *        (ex: google-scholar, istex-brower-addon, istex-widgets, ebsco ...)
+ */
+var options = {
+  userAgent:         'node-istex',
+  extraQueryString:  '&sid=node-istex'
+};
+exports.defaults = function (opt) {
+  if (opt.userAgent) {
+    options.userAgent        = opt.userAgent;
+    options.extraQueryString = '&sid=' + opt.userAgent;
+  }
+  if (opt.extraQueryString) {
+    options.extraQueryString = opt.extraQueryString;
+  }
+  return exports;
+}
+
+/**
+ * Recherche une liste de documents ISTEX
+ * Exemple pour la variable search : ?q=brain
+ */
 exports.find = function (search,  callback) {
 
   if (!search && search.length != 40) {
@@ -41,27 +60,34 @@ exports.find = function (search,  callback) {
   });
 };
 
-exports.findlot = function (search, callback) {
-
-  var urlistex = 'https://api.istex.fr/document/?size=200&output=*&q=id:(';
-  if (search && search.length != 0)  {
-    urlistex += search.shift();
-  } else {
-    return callback(new Error('index istex is incorrect'));
+/**
+ * Recherche une liste de documents ISTEX
+ * en partant d'une liste d'identifiants ISTEX
+ * Exemple pour la variable search :
+ * [ '128CB89965DA8E531EC59C61102B0678DDEE6BB7', 'F1F927C3A43BC42B161D4BBEC3DD7719001E0429' ]
+ */
+exports.findByIstexIds = function (istexIds, callback) {
+  if (istexIds.length > 200) {
+    var err = new Error('node-istex findByIstexIds cannot be called with more than 200 istex ids (' + istexIds.length + ' requested)');
+    return callback(err);
   }
-  for (var i = 0; i < search.length; i++) {
-    urlistex = urlistex + ' OR ' + search[i] ;
+  if (istexIds.length <= 0) {
+    var err = new Error('node-istex findByIstexIds should be called with 1 or more istex ids (' + istexIds.length + ' requested)');
+    return callback(err);
   }
 
-  urlistex = urlistex + ')';
+  var url = 'https://api.istex.fr/document/?size=200&output=*&q=id:(';
+  url += istexIds.join(' OR ');
+  url += ')';
 
-  var options = {
-    url: urlistex,
+  var requestOpt = {
+    url: url + options.extraQueryString,
     headers: {
-      'User-Agent': 'ezpaarse'
+      'User-Agent': options.userAgent
     }
   };
-  request.get(options, function (err, req, body) {
+
+  request.get(requestOpt, function (err, req, body) {
     if (err) { return callback(err); }
 
     try {
@@ -74,7 +100,17 @@ exports.findlot = function (search, callback) {
       return callback(new Error('erreur de requette'));
     }
     callback(null, result.hits);
-
   });
+};
+/**
+ * Deprecated: bad naming
+ */
+var findlotWarningDisplayed = false;
+exports.findlot = function (search, callback, noWarning) {
+  if (!findlotWarningDisplayed && !noWarning) {
+    console.error('node-istex: findlot is deprecated, use findByIstexIds instead');
+    findlotWarningDisplayed = true;
+  }
+  return exports.findByIstexIds(search, callback);
 };
 
