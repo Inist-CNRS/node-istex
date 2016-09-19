@@ -1,16 +1,11 @@
 'use strict';
 
-var request = require('request').defaults({proxy: process.env.http_proxy ||
-process.env.HTTP_PROXY ||
-process.env.https_proxy ||
-process.env.HTTPS_PROXY
-});
+var request = require('request');
 
 /**
-* @param {Object} search
-* @param {Object} options
-* @param {Function} callback(err, result)
-*/
+ * Recherche une liste de documents ISTEX
+ * Exemple pour la variable search
+ */
 exports.find = function (search,  callback) {
 
   if (!search && search.length != 40) {
