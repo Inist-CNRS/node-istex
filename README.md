@@ -36,6 +36,24 @@ istex.find('?q=brain' , function (err, result) {
 });
 ```
 
+Pour récupérer les métadonnées JSON d'un unique document dans la plateforme ISTEX en partant de son identifiant ISTEX :
+
+```javascript
+var istex = require("node-istex");
+istex.findByIstexId('128CB89965DA8E531EC59C61102B0678DDEE6BB7' , function (err, result) {
+  if (err) throw err;
+  console.log(result);
+
+  // ceci affichera comme résultat :
+  // 
+  // { corpusName: 'bmj',
+  //   title: 'Supplement 743',
+  //   doi: [ '10.1136/bmj.2.3003.S13' ],
+  //   [...]
+
+});
+```
+
 
 Pour faire une recherche en donnant une liste d'identifiants ISTEX dans le but de récupérer une liste de métadonnées au format JSON (un par document) :
 
