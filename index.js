@@ -27,23 +27,41 @@ exports.defaults = function (opt) {
 }
 
 /**
- * Recherche une liste de documents ISTEX
- * Exemple pour la variable search : ?q=brain
+ * Recherche des métadonnées JSON d'un document ISTEX par son identifiant istex
+ * Exemple basique pour la variable istexId: 128CB89965DA8E531EC59C61102B0678DDEE6BB7
+ */
+exports.findByIstexId = function (istexId,  callback) {
+
+  if (!istexId && istexId.length != 40) {
+    return callback(new Error('L\'identifiant ISTEX passé en argument n\'est pas valide (' + istexId + ')'));
+  }
+
+  return exports.find(istexId + '/', callback);
+};
+
+/**
+ * Recherche dans l'API ISTEX en utilisant le système de querystring
+ * proposée par l'API ISTEX.
+ * cf documentation disponible ici https://api.istex.fr/documentation/
+ * Exemple basique pour la variable search : ?q=brain
  */
 exports.find = function (search,  callback) {
 
-  if (!search && search.length != 40) {
-    return callback(new Error('index istex is incorrect'));
+  var url = 'https://api.istex.fr/document/' + search ;
+  if (url.indexOf('?') !== -1) {
+    url += options.extraQueryString;
+  } else {
+    url += options.extraQueryString.replace('&', '?');
   }
-  var urlistex = 'https://api.istex.fr/document/' + search ;
-  var options = {
-    url: urlistex,
+
+  var requestOpt = {
+    url: url,
     headers: {
-      'User-Agent': 'ezpaarse'
+      'User-Agent': options.userAgent
     }
   };
 
-  request.get(options, function (err, req, body) {
+  request.get(requestOpt, function (err, req, body) {
     if (err) { return callback(err); }
 
     try {
@@ -58,7 +76,8 @@ exports.find = function (search,  callback) {
     callback(null, result);
 
   });
-};
+}
+
 
 /**
  * Recherche une liste de documents ISTEX
