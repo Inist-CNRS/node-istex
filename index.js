@@ -2,7 +2,6 @@
 
 var request = require('request');
 
-
 /**
  * Mise en place des options réglables par la méthode defaults
  * (comme pour le module request)
@@ -13,12 +12,12 @@ var request = require('request');
  */
 var options = {
   userAgent:         'node-istex',
-  extraQueryString:  '&sid=node-istex'
+  extraQueryString:  { sid: 'node-istex' }
 };
 exports.defaults = function (opt) {
   if (opt.userAgent) {
     options.userAgent        = opt.userAgent;
-    options.extraQueryString = '&sid=' + opt.userAgent;
+    options.extraQueryString = 'sid=' + opt.userAgent;
   }
   if (opt.extraQueryString) {
     options.extraQueryString = opt.extraQueryString;
@@ -27,23 +26,37 @@ exports.defaults = function (opt) {
 }
 
 /**
- * Recherche une liste de documents ISTEX
- * Exemple pour la variable search : ?q=brain
+ * Recherche des métadonnées JSON d'un document ISTEX par son identifiant istex
+ * Exemple basique pour la variable istexId: 128CB89965DA8E531EC59C61102B0678DDEE6BB7
+ */
+exports.findByIstexId = function (istexId,  callback) {
+
+  if (!istexId && istexId.length != 40) {
+    return callback(new Error('L\'identifiant ISTEX passé en argument n\'est pas valide (' + istexId + ')'));
+  }
+
+  return exports.find(istexId + '/', callback);
+};
+
+/**
+ * Recherche dans l'API ISTEX en utilisant le système de querystring
+ * proposée par l'API ISTEX.
+ * cf documentation disponible ici https://api.istex.fr/documentation/
+ * Exemple basique pour la variable search : ?q=brain
  */
 exports.find = function (search,  callback) {
 
-  if (!search && search.length != 40) {
-    return callback(new Error('index istex is incorrect'));
-  }
-  var urlistex = 'https://api.istex.fr/document/' + search ;
-  var options = {
-    url: urlistex,
+  var url = 'https://api.istex.fr/document/' + search ;
+
+  var requestOpt = {
+    url: url,
+    qs: options.extraQueryString,
     headers: {
-      'User-Agent': 'ezpaarse'
+      'User-Agent': options.userAgent
     }
   };
 
-  request.get(options, function (err, req, body) {
+  request.get(requestOpt, function (err, req, body) {
     if (err) { return callback(err); }
 
     try {
@@ -58,7 +71,8 @@ exports.find = function (search,  callback) {
     callback(null, result);
 
   });
-};
+}
+
 
 /**
  * Recherche une liste de documents ISTEX
@@ -81,7 +95,8 @@ exports.findByIstexIds = function (istexIds, callback) {
   url += ')';
 
   var requestOpt = {
-    url: url + options.extraQueryString,
+    url: url,
+    qs: options.extraQueryString,
     headers: {
       'User-Agent': options.userAgent
     }
