@@ -1,7 +1,6 @@
 'use strict';
 
 var request = require('request');
-var qs      = require('qs');
 
 /**
  * Mise en place des options réglables par la méthode defaults
@@ -13,7 +12,7 @@ var qs      = require('qs');
  */
 var options = {
   userAgent:         'node-istex',
-  extraQueryString:  'sid=node-istex'
+  extraQueryString:  { sid: 'node-istex' }
 };
 exports.defaults = function (opt) {
   if (opt.userAgent) {
@@ -49,13 +48,9 @@ exports.find = function (search,  callback) {
 
   var url = 'https://api.istex.fr/document/' + search ;
 
-  // concaténation de extraQueryString à la liste des paramètres de l'URL
-  var basePath    = url.split('?')[0];
-  var queryString = url.split('?')[1];
-  url = basePath + '?' + qs.stringify(Object.assign(qs.parse(queryString), qs.parse(options.extraQueryString)));
-
   var requestOpt = {
     url: url,
+    qs: options.extraQueryString,
     headers: {
       'User-Agent': options.userAgent
     }
@@ -100,7 +95,8 @@ exports.findByIstexIds = function (istexIds, callback) {
   url += ')';
 
   var requestOpt = {
-    url: url + '&' + options.extraQueryString,
+    url: url,
+    qs: options.extraQueryString,
     headers: {
       'User-Agent': options.userAgent
     }

@@ -99,6 +99,6 @@ var istex = require("node-istex").defaults({
 
   // les paramètres suplémentaire à ajouter dans toutes les l'URL
   // pour faire des requêtes vers l'API istex
-  extraQueryString: 'sid=my-application'
+  extraQueryString: { sid: 'my-application' }
 });
 ```
