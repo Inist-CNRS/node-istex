@@ -1,8 +1,8 @@
 /* global describe, it */
 'use strict';
 
-var istex       = require('..');
-var expect      = require('chai').expect;
+var istex  = require('..');
+var expect = require('chai').expect;
 
 describe('node-istex', function () {
 
