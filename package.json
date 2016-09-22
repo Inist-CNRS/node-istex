@@ -1,6 +1,6 @@
 {
   "name": "node-istex",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Wrapper nodejs sur l'API ISTEX",
   "main": "index.js",
   "scripts": {
